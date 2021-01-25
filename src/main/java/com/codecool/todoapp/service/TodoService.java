@@ -24,6 +24,11 @@ public class TodoService {
         return todoRepository.findAll();
     }
 
+    public void addTodo(String title) {
+        Todo todo = Todo.builder().title(title).status(Status.ACTIVE).build();
+        todoRepository.save(todo);
+    }
+
     @PostConstruct
     public void afterInit() {
         Todo test1 = Todo.builder().title("first TODO Item").status(Status.COMPLETE).build();
