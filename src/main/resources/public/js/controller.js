@@ -152,7 +152,7 @@ class Controller {
                 this.view.showItems(respObj);
 
                 const total = respObj.length;
-                const completed = respObj.filter(item => item.completed === true).length;
+                const completed = respObj.filter(item => item.status === "COMPLETE").length;
                 const active = total - completed;
 
                 this.view.setItemsLeft(active);

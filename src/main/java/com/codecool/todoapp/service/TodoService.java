@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @AllArgsConstructor
@@ -24,9 +25,57 @@ public class TodoService {
         return todoRepository.findAll();
     }
 
+    public List<Todo> getAllByStatus(Status status) {
+        return todoRepository.getAllByStatus(status);
+    }
+
     public void addTodo(String title) {
         Todo todo = Todo.builder().title(title).status(Status.ACTIVE).build();
         todoRepository.save(todo);
+    }
+
+    public void editToDo(String id, String title) {
+        todoRepository.findById(Long.parseLong(id))
+                .ifPresent(
+                    todo -> {todo.setTitle(title);
+                            todoRepository.save(todo);}
+                );
+    }
+
+    public String findById(String id) {
+        Optional<Todo> todo =  todoRepository.findById(Long.parseLong(id));
+        if(todo.isPresent()) {
+            return todo.get().getTitle();
+        } else {
+            return "";
+        }
+    }
+
+    public void deleteTodo(String id) {
+        todoRepository.deleteById(Long.parseLong(id));
+    }
+
+    public void deleteAllCompleted(){
+        todoRepository.findAll().forEach(todo -> {
+            if(todo.getStatus().equals(Status.COMPLETE)) {
+                todoRepository.delete(todo);
+            }
+        });
+    }
+
+    public void toggleCompleted(String id, Status status) {
+        todoRepository.findById(Long.parseLong(id))
+                .ifPresent(
+                        todo -> {todo.setStatus(status);
+                                todoRepository.save(todo);}
+                );
+    }
+
+    public void toggleAllCompleted(Status status) {
+        todoRepository.findAll().forEach(todo -> {
+            todo.setStatus(status);
+            todoRepository.save(todo);
+        });
     }
 
     @PostConstruct
