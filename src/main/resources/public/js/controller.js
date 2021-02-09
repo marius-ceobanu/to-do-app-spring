@@ -12,6 +12,7 @@ class Controller {
         this.view = view;
         this._activeState = '';
         this._lastActiveState = null;
+        this.token = localStorage.getItem("token") === null ? "" : localStorage.getItem("token");
 
         view.bindAddItem(this.addItem.bind(this));
         view.bindEditItemSave(this.editItemSave.bind(this));
@@ -20,12 +21,15 @@ class Controller {
         view.bindToggleItem(this.toggleCompleted.bind(this));
         view.bindRemoveCompleted(this.removeCompletedItems.bind(this));
         view.bindToggleAll(this.toggleAll.bind(this));
+        view.bindLogin(this.login.bind(this));
 
         view.bindFilterAll(this.updateState.bind(this));
         view.bindFilterActive(this.updateState.bind(this));
         view.bindFilterComplete(this.updateState.bind(this));
 
-        this.updateState('');
+        if (this.token !== "") {
+            this.updateState('');
+        }
     }
 
     updateState(newState) {
@@ -42,25 +46,50 @@ class Controller {
      * @param params Parameters in URL format, like "param1=3&param3=asdf"
      * @param onSuccess A function to call when the request completes successfully.
      *                  The data will be in event.target.response
+     * @param logg a parameter that allows fetching for login request.
      */
-    sendAjax(endpoint, method, params = null, onSuccess = null) {
+    sendAjax(endpoint, method, params = null, onSuccess = null, logg = false) {
         const scope = this;
         const requestOptions = {method: method, body: params};
-        if (method === Controller.POST || method === Controller.PUT) {
-            requestOptions.headers = {"Content-type": "application/x-www-form-urlencoded"};
+        if (method === Controller.POST || method === Controller.PUT || method === Controller.DELETE) {
+            requestOptions.headers = {"Content-type": "application/x-www-form-urlencoded",
+                                        "Authorization" : "Bearer " + this.token};
         }
-        fetch(endpoint, requestOptions)
-            .then(response => {
-                if (response.status !== 200) {
-                    console.log("Request failed for " + endpoint + " error: " + response.error() + " HTTP status:" + response.status);
-                    return;
-                }
-                // Read the response
-                response.text().then(data => onSuccess.call(scope, data));
-            })
-            .catch(function(err) {
-                console.log("Request failed for " + endpoint + " error: " + err);
-            });
+        if (this.token !== "" || logg) {
+            fetch(endpoint, requestOptions)
+                .then(response => {
+                    if (response.status === 403) {
+                        alert("Not authorized for your user!")
+                    }
+                    if (response.status !== 200) {
+                        console.log("Request failed for " + endpoint + " error: " + response.error() + " HTTP status:" + response.status);
+                        return;
+                    }
+                    // Read the response
+                    response.text().then(data => onSuccess.call(scope, data));
+                })
+                .catch(function(err) {
+                    console.log("Request failed for " + endpoint + " error: " + err);
+                });
+        } else {
+            alert("Not Authorized! Please Login!")
+        }
+
+    }
+
+    login(username, password) {
+        const login = {
+            username: username,
+            password: password
+        };
+        console.log(login);
+        this.sendAjax("login", Controller.POST, "username="+username+"&password="+password, function (data) {
+            const resp = JSON.parse(data);
+            this.token = resp.token;
+            localStorage.setItem("token", resp.token);
+            this._refresh(true);
+            this._checkResponse(data, "login");
+        }, true);
     }
 
     /**
@@ -172,7 +201,7 @@ class Controller {
         } catch (e) {
             console.log(e);
         }
-        if (!respObj || respObj.success !== true) {
+        if (respObj === null || respObj.success !== true) {
             console.log("Error in the response for " + funcName)
         }
     }

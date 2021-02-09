@@ -11,6 +11,7 @@ class View {
         this.$main = document.querySelector('.main');
         this.$toggleAll = document.querySelector('#toggle-all');
         this.$newTodo = document.querySelector('#new-todo');
+        this.$login = document.querySelector('#loginButton');
         View.delegate(this.$todoList, 'li label', 'dblclick', ({target}) => {
             this.editItem(target);
         });
@@ -169,6 +170,17 @@ class View {
             const title = target.value.trim();
             if (title) {
                 handler(title);
+            }
+        });
+    }
+
+    bindLogin(handler) {
+        this.$login.addEventListener('click', ({target}) => {
+            const username = document.querySelector('#uname').value;
+            const password = document.querySelector('#psw').value;
+            if (username && password) {
+                handler(username, password);
+                document.getElementById('id01').style.display='none';
             }
         });
     }
