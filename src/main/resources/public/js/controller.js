@@ -29,6 +29,8 @@ class Controller {
 
         if (this.token !== "") {
             this.updateState('');
+            document.querySelector(".modalButton").style.display = "none";
+            document.querySelector(".modalButtonClose").style.display = "block";
         }
     }
 
@@ -89,6 +91,8 @@ class Controller {
             localStorage.setItem("token", resp.token);
             this._refresh(true);
             this._checkResponse(data, "login");
+            document.querySelector(".modalButton").style.display = "none";
+            document.querySelector(".modalButtonClose").style.display = "block";
         }, true);
     }
 

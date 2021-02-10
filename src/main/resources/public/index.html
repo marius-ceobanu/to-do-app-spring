@@ -28,6 +28,17 @@
             width: 100%;
         }
 
+        .modalButtonClose {
+            display: none;
+            background-color: indianred;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
         button:hover {
             opacity: 0.8;
         }
@@ -131,6 +142,7 @@
 <body>
 <!-- Button to open the modal login form -->
 <button onclick="document.getElementById('id01').style.display='block'" class="modalButton">Login</button>
+<button onclick="logout()" class="modalButtonClose">Logout</button>
 <section class="todoapp">
     <header class="header">
         <h1>todos</h1>
@@ -198,6 +210,11 @@
         if (event.target === modal) {
             modal.style.display = "none";
         }
+    }
+
+    function logout() {
+        localStorage.clear();
+        location.reload();
     }
 </script>
 
